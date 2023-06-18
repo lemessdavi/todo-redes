@@ -1,29 +1,69 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TodoForm } from "./todoForm";
 import { v4 as uuidv4 } from 'uuid';
 import { Todo } from "./todo";
 import { EditTodoForm } from "./editTodoForm";
+import axios from "axios";
 uuidv4();
 
 export const TodoWrapper = () => {
     const [todos, setTodos] = useState([]);
 
-    const addTodo = todo => {
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const response = await axios.get('http://localhost:5001/api/getTasks');
+            setTodos(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const addTodo = async todo => {
+        
+        // codigo antigo
         setTodos([...todos, {id: uuidv4(), task: todo,
         completed: false, isEditing: false}]);
         console.log(todos);
+        
+        try {
+            const response = await axios.post(`http://localhost:5001/api/addTask/${todo}`);
+            console.log(response);
+        } catch (error) {
+            console.log(error);
+        }
+        
     }
 
-    const toggleComplete = id => {
+    const toggleComplete = async (id, todo) => {
+        //codigo antigo
         setTodos(todos.map(todo => todo.id === id ? {
             ...todo, completed: !todo.completed}
             :
             todo
         ));
+        
+        try {
+            const response = await axios.post(`http://localhost:5001/api/checkTask/${id}/${todo.completed}`);
+            console.log(response);
+        } catch (error) {
+            console.log(error);
+        }
+
     }
 
-    const deleteTodo = id => {
+    const deleteTodo = async id => {
+        // codigo antigo
         setTodos(todos.filter(todo => todo.id !== id ))
+        try {
+            const response = await axios.delete(`http://localhost:5001/api/deleteTask/${id}/1`);
+            console.log(response);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     const editTodo = id => {
